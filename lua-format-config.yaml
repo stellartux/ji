@@ -1,0 +1,8 @@
+keep_simple_control_block_one_line: false
+keep_simple_function_one_line: false
+align_args: false
+align_parameter: false
+align_table_field: false
+extra_sep_at_table_end: true
+spaces_inside_table_braces: true
+single_quote_to_double_quote: true
