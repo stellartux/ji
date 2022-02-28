@@ -1,13 +1,13 @@
 ---@class Set
 local Set = require("class")({ data = {}, length = 0 })
 
----Create a new set from the given list, or an empty set if no list is given.
----@param list table
----@return Set
-function Set:new(list)
-    list = list or {}
+---Create a new set from the values of the given table, or an empty set if no
+---table is given.
+---@param init table
+---@return Set new
+function Set:new(init)
     local set = { data = {}, length = 0 }
-    for _, value in ipairs(list) do
+    for _, value in pairs(init or {}) do
         if not set.data[value] then
             set.data[value] = true
             set.length = set.length + 1
@@ -59,7 +59,7 @@ end
 ---@return Set new
 function Set:difference(other)
     local difference = self:copy()
-    for value in other:values() do
+    for value in pairs(other) do
         difference:delete(value)
     end
     return difference
@@ -78,7 +78,7 @@ end
 ---@return Set new
 function Set:intersect(other)
     local intersection = Set:new{}
-    for value in self:values() do
+    for value in pairs(self) do
         if other:contains(value) then
             intersection:add(value)
         end
@@ -89,7 +89,7 @@ end
 ---Check whether intersection of the sets is empty.
 ---@param other Set
 function Set:isdisjoint(other)
-    for value in self:values() do
+    for value in pairs(self) do
         if not other:contains(value) then
             return false
         end
@@ -105,7 +105,7 @@ end
 ---Check whether the set is a subset of the other set.
 ---@param other Set
 function Set:issubset(other)
-    for value in self:values() do
+    for value in pairs(self) do
         if not other:contains(value) then
             return false
         end
@@ -117,7 +117,7 @@ end
 ---@return table
 function Set:list()
     local list = {}
-    for value in self:values() do
+    for value in pairs(self) do
         list[#list + 1] = value
     end
     return list
@@ -127,7 +127,7 @@ end
 ---@param other Set
 ---@return Set self
 function Set:merge(other)
-    for value in other:values() do
+    for value in pairs(other) do
         self:add(value)
     end
     return self
@@ -147,18 +147,12 @@ function Set:union(other)
     return self:copy():merge(other)
 end
 
----Iterate over each value in the set.
----@return function iterator
-function Set:values()
-    return pairs(self.data)
-end
-
 ---@param other Set
 function Set:__eq(other)
     if #self ~= #other then
         return false
     end
-    for value in self:values() do
+    for value in pairs(self) do
         if not other:contains(value) then
             return false
         end
@@ -173,10 +167,18 @@ end
 
 Set.__name = "Set"
 
----@param verbose boolean
+local function setpairsnext(data, key)
+    key = next(data, key)
+    return key, key
+end
+
+function Set:__pairs()
+    return setpairsnext, self.data
+end
+
 ---@return string
-function Set:__tostring(verbose)
-    if verbose == nil and #self < 17 or verbose then
+function Set:__tostring()
+    if #self < 32 then
         return self.__name .. "{" .. table.concat(self:list(), ", ") .. "}"
     else
         return self.__name .. " with " .. #self .. " items"

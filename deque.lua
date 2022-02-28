@@ -8,7 +8,6 @@ local Deque = require("class")()
 function Deque:new(list)
     local deque = list and { table.unpack(list) } or {}
     setmetatable(deque, self)
-    self.__index = self
     return deque
 end
 

@@ -38,4 +38,8 @@ function Lens:__newindex(key, value)
     end
 end
 
+function Lens:__pairs()
+    return pairs(rawget(self, "data"))
+end
+
 return Lens
