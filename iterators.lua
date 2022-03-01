@@ -559,7 +559,9 @@ local function ziplistsnext(lists, key)
     return key, table.unpack(values)
 end
 
----Iterate through several lists together.
+---Iterate through several lists together. Each iteration returns an index, and
+---the values at that index of each of the lists passed in. Iterates until any of
+---the lists is empty.
 ---@param ... table
 ---@return function iterator
 function Iterators.ziplists(...)

@@ -85,7 +85,7 @@ function Object.mt:__index(key)
 end
 
 function Object.mt:__len()
-    return rawget(self, "data")
+    return #rawget(self, "data")
 end
 
 Object.__name = "Object"
@@ -112,7 +112,7 @@ function Object.mt:__newindex(key, value)
 end
 
 function Object.mt:__pairs()
-    return next, rawget(self, "data")
+    return pairs(rawget(self, "data"))
 end
 
 return Object

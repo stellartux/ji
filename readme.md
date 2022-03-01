@@ -25,3 +25,5 @@ protocol.
   - tables that can be frozen or sealed like JavaScript objects
 - `Set`
   - tables with set-like operations
+
+Examples of how to use each of the types can be found in their test files.
