@@ -1,8 +1,7 @@
 --[[
     Base.Iterators
     https://docs.julialang.org/en/v1/base/iterators/
-]] ---@diagnostic disable: lowercase-global
---
+]] --
 --
 local Iterators = {}
 

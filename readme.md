@@ -27,3 +27,14 @@ protocol.
   - tables with set-like operations
 
 Examples of how to use each of the types can be found in their test files.
+
+### `string`
+
+More string manipulation functions added to the `string` prototype.
+
+- `gsplit`, `split`
+  - Split a string with a pattern, returning an iterator or a list of strings.
+- `lpad`, `rpad`
+  - Pad the start or end of a string to a specified length.
+- `lstrip`, `rstrip`, `strip`
+  - Strip characters from a string at the start, the end or both.
