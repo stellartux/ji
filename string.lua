@@ -1,3 +1,33 @@
+---Remove a single trailing newline from a string.
+---@param s string
+function string.chomp(s)
+    return s:gsub("\r?\n$", "")
+end
+
+---Finds the substring which matches `pattern`, if it occurs at the end of `s`.
+---Also has a partially applied form with the signature
+---`endswith(pattern[, plain]) -> (s) -> string`
+---@param s string
+---@param pattern string|boolean
+---@param plain boolean defaults to `false`
+---@return string|function
+function string.endswith(s, pattern, plain)
+    if not pattern or pattern == true then
+        return function(ss)
+            return string.endswith(ss, s, pattern)
+        end
+    elseif plain then
+        if string.sub(s, -#pattern) == pattern then
+            return pattern
+        end
+    else
+        if string.sub(pattern, -1) ~= "$" then
+            pattern = pattern .. "$"
+        end
+        return string.match(s, pattern)
+    end
+end
+
 ---Split the string `s` at each occurrence of `pattern`, starting from `init`.
 ---@param s string
 ---@param pattern string
@@ -17,6 +47,17 @@ function string.gsplit(s, pattern, init, plain)
         done = not firstindex
         return result
     end
+end
+
+---Test whether all the characters of `s` are in the ASCII range.
+---@param s string
+function string.isascii(s)
+    for i = 1, #s do
+        if string.byte(s, i) >= 128 then
+            return false
+        end
+    end
+    return true
 end
 
 ---Pads the start of a string with a character.
@@ -61,6 +102,30 @@ function string.split(s, pattern, init, plain)
         table.insert(result, value)
     end
     return result
+end
+
+---Finds the substring which matches `pattern`, if it occurs at the start of `s`.
+---Also has a partially applied form with the signature
+---`startswith(pattern, plain) -> (s) -> string`
+---@param s string
+---@param pattern string|boolean
+---@param plain boolean
+---@return string|function
+function string.startswith(s, pattern, plain)
+    if not pattern or pattern == true then
+        return function(ss)
+            return string.startswith(ss, s, pattern)
+        end
+    elseif plain then
+        if string.sub(s, 1, #pattern) == pattern then
+            return pattern
+        end
+    else
+        if string.sub(pattern, 1) ~= "^" then
+            pattern = "^" .. pattern
+        end
+        return string.match(s, pattern)
+    end
 end
 
 ---Strip any occurrences of `pattern` from the start and end of `s`.

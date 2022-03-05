@@ -32,8 +32,14 @@ Examples of how to use each of the types can be found in their test files.
 
 More string manipulation functions added to the `string` prototype.
 
+- `chomp`
+  - Removes a trailing new line, if any.
+- `endswith`, `startswith`
+  - Check for patterns at the start or end of a string.
 - `gsplit`, `split`
   - Split a string with a pattern, returning an iterator or a list of strings.
+- `isascii`
+  - Checks if all characters of a string are in the lower ASCII range.
 - `lpad`, `rpad`
   - Pad the start or end of a string to a specified length.
 - `lstrip`, `rstrip`, `strip`

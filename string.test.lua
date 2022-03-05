@@ -1,4 +1,4 @@
-dofile("ji/string.lua")
+dofile("string.lua")
 
 local expected = { "hello", "to", "the", "world" }
 local index = 1
@@ -21,5 +21,23 @@ assert(string.rstrip("w!!!!!!!!!!!", "!") == "w", "rstrip, not whitespace")
 assert(string.strip("     wooooo       ") == "wooooo", "strip")
 assert(string.strip("......wooooo......", "%.") == "wooooo",
     "strip, not whitespace")
+
+assert(string.chomp("hello\n") == "hello", "Should chomp a Unix newline.")
+assert(string.chomp("hello\r\n") == "hello", "Should chomp a Windows newline.")
+assert(string.chomp("hello\nworld\n\n") == "hello\nworld\n",
+    "Should only chomp the final newline.")
+
+assert(string.startswith("hello world", "hello"),
+    "Should find matches at the start.")
+assert(not string.startswith("world hello", "hello"),
+    "Should not find matches at the end.")
+assert(not string.endswith("hello world", "hello"),
+    "Should not find matches at the start.")
+assert(string.endswith("world hello", "hello"),
+    "Should find matches at the end.")
+
+assert(string.isascii("Hello, world!"), "Should recognize ASCII characters.")
+assert(not string.isascii("Hello, world! 👋🌍"),
+    "Should recognize non ASCII characters.")
 
 print("string - Tests passed.")
