@@ -208,11 +208,13 @@ function Iterators.drop(count, iterator, iterand, key)
     return iterator, iterand, key
 end
 
----Exports all the functions in `Iterators` to globals.
-function Iterators.export()
+---Exports all the functions in `Iterators` to the target environment.
+---@param env table defaults to `_G`, the global environment.
+function Iterators.export(env)
+    env = env or _G
     for key, value in pairs(Iterators) do
         if key ~= "export" then
-            _G[key] = value
+            env[key] = value
         end
     end
 end
