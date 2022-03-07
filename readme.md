@@ -44,3 +44,12 @@ More string manipulation functions added to the `string` prototype.
   - Pad the start or end of a string to a specified length.
 - `lstrip`, `rstrip`, `strip`
   - Strip characters from a string at the start, the end or both.
+
+### `table`
+
+- `find`
+  - Finds the index of a value in a list.
+- `findall`
+  - Iterate over all matching values in a list.
+- `issorted`
+  - Check if a list is sorted.
