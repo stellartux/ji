@@ -494,12 +494,17 @@ function Iterators.sum(init, iterator, iterand, key)
 end
 
 ---Close over a stateless iterator, converting it to a stateful iterator.
+---Passing `true` to a stateful iterator peeks at the next state without advancing.
 ---@param iterator function
 ---@return function stateful
 function Iterators.stateful(iterator, iterand, key)
-    return function()
-        local value
-        key, value = iterator(iterand, key)
+    local didpeek = false
+    local value
+    return function(peek)
+        if not didpeek then
+            key, value = iterator(iterand, key)
+        end
+        didpeek = peek
         return key, value
     end
 end
