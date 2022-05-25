@@ -1,4 +1,4 @@
-local Object = require "object"
+local Object = require "ji/object"
 
 local object = Object:new({ a = 0 })
 

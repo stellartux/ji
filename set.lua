@@ -1,5 +1,5 @@
 ---@class Set
-local Set = require("class")({ data = {}, length = 0 })
+local Set = require("ji/class")({ data = {}, length = 0 })
 
 ---Create a new set from the values of the given table, or an empty set if no
 ---table is given.

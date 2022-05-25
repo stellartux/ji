@@ -1,4 +1,4 @@
-local Deque = require "deque"
+local Deque = require "ji/deque"
 
 local deque = Deque:new()
 

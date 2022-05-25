@@ -1,6 +1,6 @@
 ---@class Lens
 ---A lens is a bijective table, a table where if `t[a] -> b` then `t[b] -> a`.
-local Lens = require("class")()
+local Lens = require("ji/class")()
 
 function Lens:new(table)
     local lens = { data = {} }

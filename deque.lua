@@ -1,6 +1,6 @@
 ---@class Deque
 ---A deque is a Double-Ended QUEue.
-local Deque = require("class")()
+local Deque = require("ji/class")()
 
 ---Create a new deque from a list. Creates an empty deque if no list is passed.
 ---@param list table

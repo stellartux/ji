@@ -1,4 +1,4 @@
-local Set = require "set"
+local Set = require "ji/set"
 
 local set = Set:new()
 

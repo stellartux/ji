@@ -1,4 +1,4 @@
-local iterators = require("iterators")
+local iterators = require("ji/iterators")
 
 local iter = iterators.stateful(iterators.countfrom())
 

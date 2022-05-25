@@ -14,7 +14,7 @@
 ---object can have its status increased but not decreased, i.e. a sealed object may
 ---go on to be frozen, but a frozen object can't be unfrozen and revert to being
 ---sealed. `shoulderror` can be changed.
-local Object = require("class")()
+local Object = require("ji/class")()
 Object.mt = {}
 
 function Object:new(data)
