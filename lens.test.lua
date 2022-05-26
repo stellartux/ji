@@ -1,4 +1,4 @@
-local Lens = require "lens"
+local Lens = require "ji/lens"
 
 local lens = Lens:new()
 

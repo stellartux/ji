@@ -3,12 +3,13 @@
     https://docs.julialang.org/en/v1/base/iterators/
 ]] --
 --
-local Iterators = {}
+local Iterators = require("ji/module")()
 
 ---Given a 2-argument function `combiner` and an iterator `iterator`,
 ---return a new iterator that successively applies `combiner` to the previous
 ---value and the next element of `iterator`.
----@param combiner function lambda with signature `(total, value) -> newtotal`
+---@param combiner function with signature `(total, value) -> newtotal`
+---@param init any
 ---@param iterator function
 ---@return function stateful
 function Iterators.accumulate(combiner, init, iterator, iterand, key)
@@ -24,12 +25,11 @@ function Iterators.accumulate(combiner, init, iterator, iterand, key)
 end
 
 ---Returns true if every value in the iterator satisfies the predicate.
----@param predicate function
----@param iterator function
+---@param predicate function (value, key, iterand) -> boolean
 ---@return boolean
-function Iterators.all(predicate, iterator, ...)
-    for _, value in iterator, ... do
-        if not predicate(value) then
+function Iterators.all(predicate, iterator, iterand, key)
+    for key, value in iterator, iterand, key do
+        if not predicate(value, key, iterand) then
             return false
         end
     end
@@ -71,18 +71,29 @@ function Iterators.any(predicate, iterator, iterand, key)
     if type(iterator) ~= "function" then
         iterator, iterand, key = predicate, iterator, iterand
     end
-    for _, value in iterator, iterand, key do
-        if predicate(value) then
+    for key, value in iterator, iterand, key do
+        if predicate(value, key, iterand) then
             return true
         end
     end
     return false
 end
 
+---Convert an iterator into a list.
+---@param iterator function
+---@return table list
+function Iterators.collect(iterator, ...)
+    local result = {}
+    for _, value in iterator, ... do
+        table.insert(result, value)
+    end
+    return result
+end
+
 ---Convert an iterator into a table.
 ---@param iterator function
 ---@return table
-function Iterators.collect(iterator, ...)
+function Iterators.collecttable(iterator, ...)
     local result = {}
     for key, value in iterator, ... do
         result[key] = value
@@ -114,16 +125,16 @@ function Iterators.count(predicate, iterator, iterand, key)
 end
 
 local function countfromnext(step, total)
-    return step + total, total
+    return step + total, step + total
 end
 
 ---Iterate counting from `start`, adding `step` on each iteration.
----@param start number defaults to `1`
----@param step number defaults to `1`
+---@param start? number defaults to `1`
+---@param step? number defaults to `1`
 ---@return function iterator
 function Iterators.countfrom(start, step)
     step = step or 1
-    start = start and start - step or 0
+    start = start and (start - step) or 0
     return countfromnext, step, start
 end
 
@@ -208,15 +219,23 @@ function Iterators.drop(count, iterator, iterand, key)
     return iterator, iterand, key
 end
 
----Exports all the functions in `Iterators` to the target environment.
----@param env table defaults to `_G`, the global environment.
-function Iterators.export(env)
-    env = env or _G
-    for key, value in pairs(Iterators) do
-        if key ~= "export" then
-            env[key] = value
-        end
+---Wraps an iterator, replacing its keys with a series of numbers.
+---@param init number? defaults to `1`
+---@param step number? defaults to `1`
+---@param iterator function
+---@return function iterator
+function Iterators.enumerate(init, step, iterator, iterand, key)
+    if type(init) ~= "number" then
+        init, step, iterator, iterand, key = 1, init, step, iterator, iterand
     end
+    if type(step) ~= "number" then
+        step, iterator, iterand, key = 1, step, iterator, iterand
+    end
+    return function(step, i)
+        local value
+        key, value = iterator(iterand, key)
+        return i + step, value
+    end, step, init - step
 end
 
 ---Calculate the minimum and maximum values of the iterator.
@@ -304,6 +323,7 @@ function Iterators.flatten(...)
         end
         return innerkey, value
     end
+
     return flattennext
 end
 
@@ -317,8 +337,26 @@ function Iterators.foreach(procedure, iterator, ...)
     end
 end
 
+local function nextkey(iterand, key)
+    key = next(iterand, key)
+    return key, key
+end
+
+local function keys(_, x) return x, x end
+
+---Iterate over the keys of a table, or convert a `key, value` iterator to a `key, key` iterator.
+---@param ... table|function
+---@return function stateful if passed an iterator, `stateless` is passed a table.
+function Iterators.keys(...)
+    if type(...) == "table" then
+        return nextkey, ...
+    else
+        return Iterators.map(keys, ...)
+    end
+end
+
 ---Call `mapper` on each value of `iterator`.
----@param mapper function
+---@param mapper function `(value, key, iterand) -> newvalue`
 ---@param iterator function
 ---@return function stateful
 function Iterators.map(mapper, iterator, iterand, key)
@@ -326,7 +364,7 @@ function Iterators.map(mapper, iterator, iterand, key)
         local value
         key, value = iterator(iterand, key)
         if key ~= nil then
-            return key, mapper(value)
+            return key, mapper(value, key, iterand)
         end
     end
 end
@@ -371,8 +409,8 @@ end
 function Iterators.only(iterator, iterand, key)
     local value
     key, value = iterator(iterand, key)
-    local nextkey = iterator(iterand, key)
-    if key and not nextkey then
+    local next_key = iterator(iterand, key)
+    if key and not next_key then
         return key, value
     else
         error("Expected the iterator to only have one element.")
@@ -381,30 +419,52 @@ end
 
 ---Partition the keys and values of an iterator into groups with a length
 ---less than or equal to `count`.
----@param count number
+---@param count integer
+---@param step integer? optional, defaults to `count`
 ---@param iterator function
 ---@return function stateful
-function Iterators.partition(count, iterator, iterand, key)
+function Iterators.partition(count, step, iterator, iterand, key)
+    count = math.tointeger(count)
+    assert(count and count > 0, "count must be a positive integer.")
+    if type(step) == "number" then
+        step = math.tointeger(step)
+        assert(step and step > 0, "step must be a positive integer.")
+    else
+        step, iterator, iterand, key = count, step, iterator, iterand
+    end
+    local first = true
     local done = false
-    return function()
-        if done then
-            return
+    local keys = {}
+    local values = {}
+    for _ = 1, count do
+        local value
+        key, value = iterator(iterand, key)
+        if key == nil then
+            done = true
+            break
         end
-        local keys = {}
-        local values = {}
-        for _ = 1, count do
+        table.insert(keys, key)
+        table.insert(values, value)
+    end
+    return function()
+        if first then
+            first = false
+            return keys, values
+        end
+        if done then return end
+        for _ = 1, step do
+            table.remove(keys, 1)
+            table.remove(values, 1)
             local value
             key, value = iterator(iterand, key)
-            if value == nil then
+            if key == nil then
                 done = true
                 break
             end
             table.insert(keys, key)
             table.insert(values, value)
         end
-        if #keys > 0 then
-            return keys, values
-        end
+        return keys, values
     end
 end
 
@@ -440,7 +500,7 @@ local function repeatednext(value, count)
 end
 
 ---Return `value` `count` times, or forever if no `count` is provided.
----@param count integer optional, defaults to forever
+---@param count? integer optional, defaults to forever
 ---@return function iterator
 function Iterators.repeated(value, count)
     if count == nil then
@@ -467,7 +527,7 @@ function Iterators.reversecollect(iterator, iterand, key)
 end
 
 local function reverseipairsnext(iterand, index)
-    return index - 1, iterand[index - 1]
+    if index > 1 then return index - 1, iterand[index - 1] end
 end
 
 ---Iterate over `ipairs(table)` in reverse order.
@@ -480,7 +540,7 @@ function Iterators.reverseipairs(iterand)
 end
 
 ---Sum all the values of the iterator.
----@param init any optional, defaults to `0`
+---@param init? any optional, defaults to `0`
 ---@param iterator function
 ---@return any total
 function Iterators.sum(init, iterator, iterand, key)
@@ -515,9 +575,11 @@ end
 ---@return function stateful
 function Iterators.take(count, iterator, iterand, key)
     return function()
+        local value
         count = count - 1
         if count >= 0 then
-            return iterator(iterand, key)
+            key, value = iterator(iterand, key)
+            return key, value
         end
     end
 end
@@ -548,6 +610,38 @@ function Iterators.unique(iterator, iterand, key)
         until not seen[value] or key == nil
         seen[value] = true
         return key, value
+    end
+end
+
+local function zip_isvalid(_, value)
+    return type(value) == 'table' and type(value[1]) == "function"
+end
+
+---Zip a group of iterators together. Each iterator call must be wrapped in a table.
+-- #### Example
+--[[```lua
+> for a, b, c, d in zip({ipairs{ 4, 5, 6 }}, {pairs{ "a" = "b", "c" = "d", "e" = "f", "g" = "h"}}) do
+>>    print(a, b, c, d)
+>> end
+1       4       a       b
+2       5       c       d
+3       6       e       f
+```]]
+---@param ... table iterator calls, each wrapped in a list
+---@return function iterator
+function Iterators.zip(...)
+    local iters = table.pack(...)
+    -- assert(Iterators.all(zip_isvalid, ipairs(iters)), "Each iterator call must be wrapped in a table.")
+    return function()
+        local result = {}
+        for index, iter in ipairs(iters) do
+            local iterator, iterand, key, value = table.unpack(iter)
+            key, value = iterator(iterand, key)
+            iter[3] = key
+            result[2 * index - 1] = key
+            result[2 * index] = value
+        end
+        return table.unpack(result)
     end
 end
 

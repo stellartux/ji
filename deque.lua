@@ -38,17 +38,13 @@ end
 
 ---Remove a value from the end of the deque.
 function Deque:pop()
-    if self:isempty() then
-        error "Deque is empty"
-    end
+    assert(not self:isempty(), "Deque is empty")
     return table.remove(self)
 end
 
 ---Remove a value from the start of the deque.
 function Deque:popfirst()
-    if self:isempty() then
-        error "Deque is empty"
-    end
+    assert(not self:isempty(), "Deque is empty")
     return table.remove(self, 1)
 end
 
@@ -104,9 +100,9 @@ function Deque:__eq(other)
     return true
 end
 
+Deque.__index = Deque
 Deque.__name = "Deque"
 
----@return string
 function Deque:__tostring()
     return self.__name .. "{" .. table.concat(self, ", ") .. "}"
 end

@@ -1,5 +1,6 @@
 ---@class Set
 local Set = require("ji/class")({ data = {}, length = 0 })
+local mt = { __index = Set, __call = Set.new }
 
 ---Create a new set from the values of the given table, or an empty set if no
 ---table is given.
@@ -13,7 +14,7 @@ function Set:new(init)
             set.length = set.length + 1
         end
     end
-    setmetatable(set, self)
+    setmetatable(set, mt)
     return set
 end
 
@@ -77,7 +78,7 @@ end
 ---@param other Set
 ---@return Set new
 function Set:intersect(other)
-    local intersection = Set:new{}
+    local intersection = Set:new({})
     for value in pairs(self) do
         if other:contains(value) then
             intersection:add(value)
@@ -147,21 +148,23 @@ function Set:union(other)
     return self:copy():merge(other)
 end
 
+mt.__call = function(...)
+    print("Called me")
+    return Set:new(...)
+end
+
 ---@param other Set
-function Set:__eq(other)
-    if #self ~= #other then
-        return false
-    end
-    for value in pairs(self) do
-        if not other:contains(value) then
-            return false
-        end
-    end
-    return true
+function mt:__eq(other)
+    return type(other) == "table"
+        and self.issubset
+        and other.issubset
+        and #self == #other
+        and self:issubset(other)
+        and other:issubset(self)
 end
 
 ---@return integer
-function Set:__len()
+function mt:__len()
     return self.length
 end
 
@@ -172,12 +175,12 @@ local function setpairsnext(data, key)
     return key, key
 end
 
-function Set:__pairs()
+function mt:__pairs()
     return setpairsnext, self.data
 end
 
 ---@return string
-function Set:__tostring()
+function mt:__tostring()
     if #self < 32 then
         return self.__name .. "{" .. table.concat(self:list(), ", ") .. "}"
     else

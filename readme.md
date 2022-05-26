@@ -51,5 +51,7 @@ More string manipulation functions added to the `string` prototype.
   - Finds the index of a value in a list.
 - `findall`
   - Iterate over all matching values in a list.
+- `findsorted`
+  - Binary search for sorted lists.
 - `issorted`
   - Check if a list is sorted.

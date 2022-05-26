@@ -9,7 +9,7 @@ end
 ---`endswith(pattern[, plain]) -> (s) -> string`
 ---@param s string
 ---@param pattern string|boolean
----@param plain boolean defaults to `false`
+---@param plain boolean? defaults to `false`
 ---@return string|function
 function string.endswith(s, pattern, plain)
     if not pattern or pattern == true then
@@ -17,7 +17,7 @@ function string.endswith(s, pattern, plain)
             return string.endswith(ss, s, pattern)
         end
     elseif plain then
-        if string.sub(s, -#pattern) == pattern then
+        if string.sub(s, - #pattern) == pattern then
             return pattern
         end
     else
@@ -31,8 +31,8 @@ end
 ---Split the string `s` at each occurrence of `pattern`, starting from `init`.
 ---@param s string
 ---@param pattern string
----@param init integer
----@param plain boolean when true, pattern matching facilities are turned off.
+---@param init integer? defaults to `1`.
+---@param plain boolean? defaults to `nil`, when `true`, pattern matching facilities are turned off.
 ---@return function stateful an iterator of each substring
 function string.gsplit(s, pattern, init, plain)
     init = init or 1
@@ -63,14 +63,14 @@ end
 ---Pads the start of a string with a character.
 ---@param s string
 ---@param len integer
----@param pad string
+---@param pad string? defaults to a single space character.
 function string.lpad(s, len, pad)
-    return string.rep(pad or " ", len - s:len()) .. s
+    return string.rep(pad and string.sub(pad, 1, 1) or " ", len - s:len()) .. s
 end
 
 ---Removes any leading characters from `s` which match the pattern.
 ---@param s string
----@param pattern string defaults to `"%s"`, matching whitespace
+---@param pattern string? defaults to `"%s"`, matching whitespace
 function string.lstrip(s, pattern)
     return s:gsub("^" .. (pattern or "%s") .. "+", "")
 end
@@ -78,14 +78,14 @@ end
 ---Pads the end of a string with a character.
 ---@param s string
 ---@param len integer
----@param pad string
+---@param pad string? defaults to a single space character.
 function string.rpad(s, len, pad)
-    return s .. string.rep(pad or " ", len - s:len())
+    return s .. string.rep(pad and string.sub(pad, 1, 1) or " ", len - s:len())
 end
 
 ---Removes any trailing characters from `s` which match the pattern.
 ---@param s string
----@param pattern string defaults to `"%s"`, matching whitespace
+---@param pattern string? defaults to `"%s"`, matching whitespace
 function string.rstrip(s, pattern)
     return s:gsub((pattern or "%s") .. "+$", "")
 end
@@ -109,7 +109,7 @@ end
 ---`startswith(pattern, plain) -> (s) -> string`
 ---@param s string
 ---@param pattern string|boolean
----@param plain boolean
+---@param plain boolean? defaults to `false`
 ---@return string|function
 function string.startswith(s, pattern, plain)
     if not pattern or pattern == true then
@@ -130,7 +130,7 @@ end
 
 ---Strip any occurrences of `pattern` from the start and end of `s`.
 ---@param s string
----@param pattern string defaults to matching whitespace
+---@param pattern string? defaults to matching whitespace
 function string.strip(s, pattern)
     pattern = pattern or "%s"
     return s:lstrip(pattern):rstrip(pattern)

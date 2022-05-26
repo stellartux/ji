@@ -1,4 +1,4 @@
-dofile("string.lua")
+require("ji/string")
 
 local expected = { "hello", "to", "the", "world" }
 local index = 1
