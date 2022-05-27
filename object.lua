@@ -14,7 +14,7 @@
 ---object can have its status increased but not decreased, i.e. a sealed object may
 ---go on to be frozen, but a frozen object can't be unfrozen and revert to being
 ---sealed. `shoulderror` can be changed.
-local Object = require("ji/class")()
+local Object = require("ji/class")("Object")
 Object.mt = {}
 
 function Object:new(data)
@@ -29,7 +29,7 @@ end
 
 ---Freeze an object, sealing the object and preventing any value from being changed.
 ---@param object Object
----@param shoulderror boolean throw an error on attempts to mutate a field
+---@param shoulderror boolean? throw an error on attempts to mutate a field
 ---@return Object object
 function Object.freeze(object, shoulderror)
     rawset(object, "shoulderror", shoulderror and true or false)
@@ -60,7 +60,7 @@ end
 
 ---Prevent extensions of an object, so that new keys can't be added.
 ---@param object Object
----@param shoulderror boolean throw an error on attempts to add a new key.
+---@param shoulderror boolean? throw an error on attempts to add a new key.
 ---@return Object object
 function Object.preventextensions(object, shoulderror)
     rawset(object, "shoulderror", shoulderror and true or false)
@@ -71,7 +71,7 @@ end
 
 ---Seal an object, preventing any keys from being added or removed.
 ---@param object Object
----@param shoulderror boolean throw an error on attempts to add or remove a key.
+---@param shoulderror boolean? throw an error on attempts to add or remove a key.
 ---@return Object object
 function Object.seal(object, shoulderror)
     rawset(object, "shoulderror", shoulderror and true or false)

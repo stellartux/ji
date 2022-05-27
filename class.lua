@@ -3,12 +3,13 @@ local Class = {}
 setmetatable(Class, Class)
 
 ---Create a Class from the given table.
----@param class table? the prototype table
+---@param name string? the name of the class
 ---@return Class
-function Class:new(class)
-    class = class or {}
+function Class:new(name)
+    local class = {}
     setmetatable(class, self)
-    class.__index = self
+    class.__index = class
+    class.__name = name
     return class
 end
 

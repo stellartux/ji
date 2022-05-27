@@ -1,6 +1,5 @@
 ---@class Set
-local Set = require("ji/class")({ data = {}, length = 0 })
-local mt = { __index = Set, __call = Set.new }
+local Set = require("ji/class")("Set")
 
 ---Create a new set from the values of the given table, or an empty set if no
 ---table is given.
@@ -14,23 +13,26 @@ function Set:new(init)
             set.length = set.length + 1
         end
     end
-    setmetatable(set, mt)
+    setmetatable(set, self)
     return set
 end
 
 ---Adds a value to the set.
 ---@return Set self
-function Set:add(value)
-    if not self:contains(value) then
+function Set:add(value, ...)
+    if value and not self:contains(value) then
         self.data[value] = true
         self.length = self.length + 1
+        return self:add(...)
     end
     return self
 end
 
 ---Check if the set contains the given value.
-function Set:contains(value)
-    return self.data[value] == true
+function Set:contains(value, ...)
+    if value then
+        return self.data[value] == true, self:contains(...)
+    end
 end
 
 ---Make a shallow copy of the set.
@@ -47,10 +49,11 @@ end
 ---Delete the value from the set.
 ---@param value any
 ---@return Set self
-function Set:delete(value)
-    if self:contains(value) then
+function Set:delete(value, ...)
+    if value and self:contains(value) then
         self.data[value] = nil
         self.length = self.length - 1
+        return self:delete(...)
     end
     return self
 end
@@ -137,8 +140,22 @@ end
 ---Make a copy of the set with the value removed.
 ---@param value any
 ---@return Set new
-function Set:remove(value)
-    return self:copy():delete(value)
+function Set:remove(value, ...)
+    return self:copy():delete(value, ...)
+end
+
+---The symmetric difference between the set and the other set.
+---@param other Set
+function Set:symdiff(other)
+    local result = self:copy()
+    for value in pairs(other) do
+        if self:contains(value) then
+            self:delete(value)
+        else
+            self:add(value)
+        end
+    end
+    return result
 end
 
 ---Create the union of the set and another set.
@@ -148,43 +165,39 @@ function Set:union(other)
     return self:copy():merge(other)
 end
 
-mt.__call = function(...)
-    print("Called me")
-    return Set:new(...)
-end
+Set.__add = Set.union
+Set.__bxor = Set.symdiff
 
----@param other Set
-function mt:__eq(other)
-    return type(other) == "table"
+function Set:__eq(other)
+    return not not (type(other) == "table"
         and self.issubset
         and other.issubset
         and #self == #other
-        and self:issubset(other)
-        and other:issubset(self)
+        and self:issubset(other))
 end
 
 ---@return integer
-function mt:__len()
+function Set:__len()
     return self.length
 end
 
-Set.__name = "Set"
+Set.__sub = Set.difference
 
 local function setpairsnext(data, key)
     key = next(data, key)
     return key, key
 end
 
-function mt:__pairs()
+function Set:__pairs()
     return setpairsnext, self.data
 end
 
 ---@return string
-function mt:__tostring()
-    if #self < 32 then
-        return self.__name .. "{" .. table.concat(self:list(), ", ") .. "}"
+function Set:__tostring()
+    if #self < 10 then
+        return "Set{ " .. table.concat(self:list(), ", ") .. " }"
     else
-        return self.__name .. " with " .. #self .. " items"
+        return "Set with " .. #self .. " items"
     end
 end
 

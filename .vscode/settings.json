@@ -2,5 +2,6 @@
   "vscode-lua-format.configPath": "lua-format-config.yaml",
   "editor.formatOnSave": true,
   "editor.rulers": [83],
-  "terminal.integrated.fontFamily": "'B612 Mono', monospace"
+  "terminal.integrated.fontFamily": "'B612 Mono', monospace",
+  "Lua.diagnostics.disable": ["redefined-local"]
 }

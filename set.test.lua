@@ -20,7 +20,7 @@ local union = set:union(other)
 local intersection = set:intersect(other)
 assert(set ~= other, "Unequal sets should not be equal.")
 assert(union == Set { 1, 2, 3, 4 }, "Set union")
-assert(tostring(union) == "Set{1, 2, 3, 4}")
+assert(tostring(union) == "Set{ 1, 2, 3, 4 }")
 assert(intersection == Set { 2, 3 }, "Set intersection")
 
 print("set.lua - Tests passed.")
