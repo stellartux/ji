@@ -170,4 +170,20 @@ function Table.issorted(list, isless, rev)
     return true
 end
 
+---Reverses a list in place.
+---@param list any[]
+---@param start integer? defaults to `1`
+---@param stop integer? defaults to `#list`
+---@return any[] list modified input list
+function Table.reverse(list, start, stop)
+    start = start and assert(start >= 1 and math.tointeger(start),
+        "start must be between 1 and the length of the list.") or 1
+    stop = stop and assert(stop <= #list and math.tointeger(stop),
+        "stop must be between 1 and the length of the list.") or #list
+    for i = start, (start + stop) // 2 do
+        list[i], list[stop - i + 1] = list[stop - i + 1], list[i]
+    end
+    return list
+end
+
 return Table
