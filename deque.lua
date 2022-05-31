@@ -26,7 +26,7 @@ end
 
 ---Empty the deque, reseting it to its initial state.
 function Deque:empty()
-    for index, _ in ipairs(self) do
+    for index in ipairs(self) do
         self[index] = nil
     end
     return self
