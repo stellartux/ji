@@ -463,22 +463,22 @@ function Iterators.partition(count, step, iterator, iterand, key)
     return function()
         if first then
             first = false
-        elseif done then
-            return
         else
             for _ = 1, step do
                 table.remove(keys, 1)
                 table.remove(values, 1)
             end
-            for _ = 1, step do
-                local value
-                key, value = iterator(iterand, key)
-                if key == nil then
-                    done = true
-                    break
+            if not done then
+                for _ = 1, step do
+                    local value
+                    key, value = iterator(iterand, key)
+                    if key == nil then
+                        done = true
+                        break
+                    end
+                    table.insert(keys, key)
+                    table.insert(values, value)
                 end
-                table.insert(keys, key)
-                table.insert(values, value)
             end
         end
         if #keys > 0 then
