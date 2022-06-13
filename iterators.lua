@@ -492,6 +492,20 @@ function Iterators.prod(init, iterator, iterand, key)
     return init
 end
 
+---Iterate over a range of values
+---@param start any optional, defaults to `1`
+---@param stop any
+---@param step any optional, defaults to `1`
+function Iterators.range(start, stop, step)
+    if not stop then start, stop, step = 1, start, 1 end
+    step = step or 1
+    local value = start - step
+    return function()
+        value = value + step
+        if value <= stop then return value, value end
+    end
+end
+
 ---Reduce an iterator from the left.
 ---@param reducer function
 ---@param iterator function

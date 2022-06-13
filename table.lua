@@ -170,6 +170,18 @@ function Table.issorted(list, isless, rev)
     return true
 end
 
+---Print the table as a hashmap.
+---@param table table
+function Table.printpairs(table)
+    for k, v in pairs(table) do print(k, v) end
+end
+
+---Print the table as a list.
+---@param list any[]
+function Table.printipairs(list)
+    for i, v in ipairs(list) do print(i, v) end
+end
+
 ---Reverses a list in place.
 ---@param list any[]
 ---@param start integer? defaults to `1`
