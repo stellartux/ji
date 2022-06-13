@@ -55,4 +55,7 @@ print("    extrema(...)")
 assert(Table.equallist(table.pack(extrema(ipairs({ 32, 45, -50, 45 }))), { 3, -50, -50, 2, 45, 45 }))
 assert(Table.equallist(table.pack(extrema(math.abs, ipairs({ 32, 45, -50, 45 }))), { 1, 32, 32, 3, -50, 50 }))
 
+print("    cycle(...)")
+assert(Table.equallist(collect(cycle(3, ipairs { 10, 20, 30 })), { 10, 20, 30, 10, 20, 30, 10, 20, 30 }))
+
 print("iterators - Tests passed.")

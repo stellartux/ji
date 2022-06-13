@@ -9,25 +9,7 @@ local Iterators = require("ji/iterators")
 ---@param base integer? optional, defaults to `10`
 ---@return integer[]
 function Math.digits(n, base)
-    n = math.tointeger(n)
-    if not n then
-        error("n must be an integer.")
-    elseif n < 0 then
-        local digits = Math.digits(-n, base)
-        digits[#digits] = -digits[#digits]
-        return digits
-    end
-    if base and (not math.tointeger(base) or base < 1) then
-        error("base must be a positive integer.")
-    elseif not base then
-        base = 10
-    end
-    local result = {}
-    repeat
-        table.insert(result, math.fmod(n, base))
-        n = n // base
-    until n == 0
-    return result
+    return Iterators.collect(Math.eachdigit(n, base))
 end
 
 local function nextdigit(base, n)
@@ -40,14 +22,10 @@ end
 ---@return function iterator
 function Math.eachdigit(n, base)
     n = assert(math.tointeger(n), "n must be an integer.")
-    if base then
-        base = math.tointeger(base)
-        assert(base and base > 0, "base must be a positive integer.")
-    else
-        base = 10
-    end
-    if n == 0 then
-        return Iterators.repeated(0, 1)
+    base = base and assert(base > 0 and math.tointeger(base),
+        "base must be a positive integer.") or 10
+    if math.abs(n) < base then
+        return Iterators.repeated(n, 1)
     elseif n > 0 then
         return nextdigit, base, n
     elseif n < 0 then
@@ -60,6 +38,8 @@ function Math.eachdigit(n, base)
     end
 end
 
+---@param x integer
+---@param y integer
 local function gcd(x, y)
     return y == 0 and x or gcd(y, x % y)
 end
@@ -70,11 +50,7 @@ end
 ---@param ... integer
 function Math.gcd(x, y, ...)
     y = math.tointeger(y)
-    if y then
-        return Math.gcd(gcd(x, y), ...)
-    else
-        return x
-    end
+    return y and Math.gcd(gcd(x, y), ...) or x
 end
 
 ---Calculates the least common multiple of the given integers.
@@ -82,11 +58,7 @@ end
 ---@param y integer
 ---@param ... integer?
 function Math.lcm(x, y, ...)
-    if y then
-        return Math.lcm(math.abs(x) * (math.abs(y) / gcd(x, y)), ...)
-    else
-        return x
-    end
+    return y and Math.lcm(math.abs(x) * (math.abs(y) // gcd(x, y)), ...) or x
 end
 
 local function primes(cache, prime)
@@ -102,12 +74,8 @@ end
 ---Lazily calculates each prime below the limit.
 ---@param max integer? defaults to `229`, the first 50 primes.
 function Math.primes(max)
-    if max then
-        max = math.tointeger(max)
-        assert(max and max > 0, "max must be an positive integer.")
-    else
-        max = 229
-    end
+    max = max and assert(max > 0 and math.tointeger(max),
+        "max must be an positive integer.") or 229
     local cache = Table.fill({}, true, 1, max)
     cache[1] = false
     return primes, cache, 1

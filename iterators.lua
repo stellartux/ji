@@ -4,6 +4,7 @@
 ]] --
 --
 local Iterators = require("ji/module")()
+local Operators = require("ji/operators")
 
 ---Given a 2-argument function `combiner` and an iterator `iterator`,
 ---return a new iterator that successively applies `combiner` to the previous
@@ -138,32 +139,30 @@ function Iterators.countfrom(start, step)
     return countfromnext, step, start
 end
 
-local function multiply(a, b)
-    return a * b
-end
-
 ---Iterate over the cumulative product of the values of the iterator.
 ---@param iterator function
 ---@return function stateful
 function Iterators.cumprod(iterator, ...)
-    return Iterators.accumulate(multiply, 1, iterator, ...)
-end
-
-local function add(a, b)
-    return a + b
+    return Iterators.accumulate(Operators.mul, 1, iterator, ...)
 end
 
 ---Iterate over the cumulative sum of the values of the iterator.
 ---@param iterator function
 ---@return function stateful
 function Iterators.cumsum(iterator, ...)
-    return Iterators.accumulate(add, 0, iterator, ...)
+    return Iterators.accumulate(Operators.add, 0, iterator, ...)
 end
 
----Cycle through the values of the iterator forever.
+---Cycle through the values of the iterator `count` times, or forever if no count is provided.
+---@param count integer? optional, defaults to looping forever
 ---@param iterator function
 ---@return function stateful
-function Iterators.cycle(iterator, iterand, key)
+function Iterators.cycle(count, iterator, iterand, key)
+    if type(count) == "function" then
+        count, iterator, iterand, key = 1 / 0, count, iterator, iterand
+    elseif count == 0 then
+        return identity
+    end
     local exhausted = false
     local keys = {}
     local values = {}
@@ -179,8 +178,14 @@ function Iterators.cycle(iterator, iterand, key)
             end
             exhausted = true
         end
-        index = index % #keys + 1
-        return keys[index], values[index]
+        index = index + 1
+        if index > #keys then
+            index = 1
+            count = count - 1
+        end
+        if count > 0 then
+            return keys[index], values[index]
+        end
     end
 end
 
@@ -502,7 +507,9 @@ function Iterators.range(start, stop, step)
     local value = start - step
     return function()
         value = value + step
-        if value <= stop then return value, value end
+        if step > 0 and value <= stop or value >= stop then
+            return value, value
+        end
     end
 end
 
