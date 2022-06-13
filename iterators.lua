@@ -238,30 +238,36 @@ function Iterators.enumerate(init, step, iterator, iterand, key)
     end, step, init - step
 end
 
----Calculate the minimum and maximum values of the iterator.
+---Calculate the minimum and maximum values of applying `fn` to the iterator.
+---If multiple values are found, returns the first value.
+---@param fn function optional, defaults to `identity`
 ---@param iterator function
----@return any minkey the key of the minimum value
+---@return any minkey the key of the minimum argument
+---@return any minarg the argument of the minimum value
 ---@return any minvalue the minimum value
----@return any maxkey the key of the maximum value
+---@return any maxkey the key of the maximum argument
+---@return any maxarg the argument of the minimum value
 ---@return any maxvalue the maximum value
-function Iterators.extrema(iterator, iterand, key)
-    local minkey, maxkey, minvalue, maxvalue
-    key, minvalue = iterator(iterand, key)
-    minkey, maxkey, maxvalue = key, key, minvalue
-    if key == nil then
-        return
+function Iterators.extrema(fn, iterator, iterand, key)
+    if type(iterator) ~= "function" then
+        fn, iterator, iterand, key = identity, fn, iterator, iterand
     end
-    for k, value in iterator, iterand, key do
+    local minkey, maxkey, minarg, maxarg, minvalue, maxvalue, value
+    key, minarg = iterator(iterand, key)
+    if key == nil then return end
+    minkey, maxkey = key, key
+    minvalue = fn(minarg)
+    maxarg, maxvalue = minarg, minvalue
+    for key, arg in iterator, iterand, key do
+        value = fn(arg)
         if value < minvalue then
-            minkey = k
-            minvalue = value
+            minkey, minarg, minvalue = key, arg, value
         end
         if value > maxvalue then
-            maxkey = k
-            maxvalue = value
+            maxkey, maxarg, maxvalue = key, arg, value
         end
     end
-    return minkey, minvalue, maxkey, maxvalue
+    return minkey, minarg, minvalue, maxkey, maxarg, maxvalue
 end
 
 ---Create a list of `value` repeated `count` times.
@@ -387,21 +393,25 @@ function Iterators.mapreduce(reducer, mapper, iterator, iterand, key)
     return value
 end
 
----Find the maximum value of an iterator.
+---Find the maximum key, value and fn(value) of an iterator.
+---@param fn function optional, defaults to `identity`
 ---@param iterator function
----@return any maxkey the key of the maximum value
+---@return any maxkey the key of the maximum argument
+---@return any maxarg the argument of the maximum value
 ---@return any maxvalue the maximum value
-function Iterators.maximum(iterator, ...)
-    return select(3, Iterators.extrema(iterator, ...))
+function Iterators.maximum(fn, iterator, ...)
+    return select(4, Iterators.extrema(fn, iterator, ...))
 end
 
----Find the minimum value of an iterator.
+---Find the minimum key, value and fn(value) of an iterator.
+---@param fn function optional, defaults to `identity`
 ---@param iterator function
----@return any minkey the key of the minimum value
+---@return any minkey the key of the minimum argument
+---@return any minarg the argument of the minimum value
 ---@return any minvalue the minimum value
-function Iterators.minimum(iterator, ...)
-    local minkey, minvalue = Iterators.extrema(iterator, ...)
-    return minkey, minvalue
+function Iterators.minimum(fn, iterator, ...)
+    local key, arg, value = Iterators.extrema(fn, iterator, ...)
+    return key, arg, value
 end
 
 ---Returns the only value returned by the iterator, or throws an error.
@@ -494,9 +504,7 @@ local function forevernext(value)
 end
 
 local function repeatednext(value, count)
-    if count > 0 then
-        return count - 1, value
-    end
+    if count > 0 then return count - 1, value end
 end
 
 ---Return `value` `count` times, or forever if no `count` is provided.

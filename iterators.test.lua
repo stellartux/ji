@@ -51,4 +51,8 @@ assert(Table.equallist(table.pack(iter()), { 1, 10, 1, 15 }))
 assert(Table.equallist(table.pack(iter()), { 2, 20, 2, 25 }))
 assert(Table.equallist(table.pack(iter()), { 3, 30, 3, 35 }))
 
+print("    extrema(...)")
+assert(Table.equallist(table.pack(extrema(ipairs({ 32, 45, -50, 45 }))), { 3, -50, -50, 2, 45, 45 }))
+assert(Table.equallist(table.pack(extrema(math.abs, ipairs({ 32, 45, -50, 45 }))), { 1, 32, 32, 3, -50, 50 }))
+
 print("iterators - Tests passed.")
