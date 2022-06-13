@@ -1,6 +1,7 @@
 local ji = {
     Class = require("ji/class"),
     Deque = require("ji/deque"),
+    Is = require("ji/is"),
     Iterators = require("ji/iterators"),
     Lens = require("ji/lens"),
     Math = require("ji/math"),
@@ -14,6 +15,7 @@ function ji:export(scope)
     local s = scope or _G
     s.Class = ji.Class
     s.Deque = ji.Deque
+    s.Is = ji.Is
     ji.Iterators:export(s)
     s.Lens = ji.Lens
     ji.Math:export(scope or math)
