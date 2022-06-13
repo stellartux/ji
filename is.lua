@@ -78,6 +78,10 @@ function is.even(x)
     return x % 2 == 0
 end
 
+function is.falsey(x)
+    return not x
+end
+
 ---@param x string|number
 ---@return boolean
 function is.graph(x)
@@ -161,6 +165,10 @@ function is.space(x)
     elseif type(x) == "number" then
         return x == 32 or x == 10 or x == 13 or x == 9
     end
+end
+
+function is.truthy(x)
+    return not not x
 end
 
 ---@param x string|number
