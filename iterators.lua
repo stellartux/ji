@@ -436,14 +436,13 @@ end
 ---less than or equal to `count`.
 ---@param count integer
 ---@param step integer? optional, defaults to `count`
----@param iterator function
 ---@return function stateful
 function Iterators.partition(count, step, iterator, iterand, key)
-    count = math.tointeger(count)
-    assert(count and count > 0, "count must be a positive integer.")
+    count = assert(count > 0 and math.tointeger(count),
+        "count must be a positive integer.")
     if type(step) == "number" then
-        step = math.tointeger(step)
-        assert(step and step > 0, "step must be a positive integer.")
+        step = assert(step > 0 and math.tointeger(step),
+            "step must be a positive integer.")
     else
         step, iterator, iterand, key = count, step, iterator, iterand
     end
@@ -464,22 +463,27 @@ function Iterators.partition(count, step, iterator, iterand, key)
     return function()
         if first then
             first = false
-            return keys, values
-        end
-        if done then return end
-        for _ = 1, step do
-            table.remove(keys, 1)
-            table.remove(values, 1)
-            local value
-            key, value = iterator(iterand, key)
-            if key == nil then
-                done = true
-                break
+        elseif done then
+            return
+        else
+            for _ = 1, step do
+                table.remove(keys, 1)
+                table.remove(values, 1)
             end
-            table.insert(keys, key)
-            table.insert(values, value)
+            for _ = 1, step do
+                local value
+                key, value = iterator(iterand, key)
+                if key == nil then
+                    done = true
+                    break
+                end
+                table.insert(keys, key)
+                table.insert(values, value)
+            end
         end
-        return keys, values
+        if #keys > 0 then
+            return table.pack(table.unpack(keys)), table.pack(table.unpack(values))
+        end
     end
 end
 
