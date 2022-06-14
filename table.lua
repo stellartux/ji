@@ -26,7 +26,7 @@ end
 ---@param a table
 ---@param b table
 function Table.equallist(a, b)
-    if #a ~= #b then
+    if type(a) ~= "table" or type(b) ~= "table" or #a ~= #b then
         return false
     end
     for key, val in ipairs(a) do
