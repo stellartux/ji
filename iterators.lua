@@ -324,7 +324,7 @@ end
 ---breaking when a fixed point is found. The iterator returns
 ---the value and the previous value.
 ---@generic Value
----@param endofunctor function
+---@param endofunctor fun(value: Value): Value
 ---@param value Value
 ---@return fun(endofunctor: (fun(left: Value, right: Value): Value?), value: Value): Value iterator, fun(left: Value, right: Value): Value? endofunctor, Value? value
 function Iterators.fixate(endofunctor, value)
@@ -375,9 +375,11 @@ local function keys(_, x) return x, x end
 function Iterators.keys(...)
     if type(...) == "table" then
         return nextkey, ...
-    else
+    elseif type(...) == "function" then
+        ---@diagnostic disable-next-line: param-type-mismatch
         return Iterators.map(keys, ...)
     end
+    error("Expected a table or a function, got a " .. type(...))
 end
 
 ---Call `mapper` on each value of `iterator`.
@@ -453,10 +455,10 @@ end
 ---@return function stateful
 function Iterators.partition(count, step, iterator, iterand, key)
     count = assert(count > 0 and math.tointeger(count),
-        "count must be a positive integer.")
+        "count must be a positive integer.") --[[@as integer]]
     if type(step) == "number" then
         step = assert(step > 0 and math.tointeger(step),
-            "step must be a positive integer.")
+            "step must be a positive integer.") --[[@as integer]]
     else
         step, iterator, iterand, key = count, step, iterator, iterand
     end
@@ -507,7 +509,7 @@ end
 ---@return any product
 function Iterators.prod(init, iterator, iterand, key)
     if type(init) == "function" then
-        init, iterator, iterand, key = 0, init, iterator, iterand
+        init, iterator, iterand, key = 0, init--[[@as function]] , iterator, iterand
     end
     for _, value in iterator, iterand, key do
         init = init * value

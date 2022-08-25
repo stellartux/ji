@@ -3,7 +3,7 @@ local Set = require("ji/class")("Set")
 
 ---Create a new set from the values of the given table, or an empty set if no
 ---table is given.
----@param init table
+---@param init any[]?
 ---@return Set new
 function Set:new(init)
     local set = { data = {}, length = 0 }

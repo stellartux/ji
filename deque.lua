@@ -3,7 +3,7 @@
 local Deque = require("ji/class")("Deque")
 
 ---Create a new deque from a list. Creates an empty deque if no list is passed.
----@param list table
+---@param list any[]?
 ---@return Deque
 function Deque:new(list)
     local deque = list and { table.unpack(list) } or {}

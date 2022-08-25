@@ -11,7 +11,7 @@ end
 ---@param s string
 ---@param start integer? defaults to `1`
 ---@param stop integer? defaults to `#s`
----@return function iterator yields integers
+---@return function iterator, ... yields integers
 function String.eachbyte(s, start, stop)
     start = start or 1
     stop = stop or #s
@@ -26,7 +26,7 @@ end
 ---@param s string
 ---@param start integer? defaults to `1`
 ---@param stop integer? defaults to `#s`
----@return function iterator yields strings
+---@return function iterator, ... yields strings
 function String.eachchar(s, start, stop)
     start = start or 1
     stop = stop or #s
@@ -43,7 +43,7 @@ end
 ---@param s string
 ---@param pattern string|boolean
 ---@param plain boolean? defaults to `false`
----@return string|function
+---@return string|function?
 function String.endswith(s, pattern, plain)
     if not pattern or pattern == true then
         return function(ss)
@@ -139,7 +139,7 @@ end
 ---@param s string
 ---@param pattern string|boolean
 ---@param plain boolean? defaults to `false`
----@return string|function
+---@return string|function?
 function String.startswith(s, pattern, plain)
     if not pattern or pattern == true then
         return function(ss)

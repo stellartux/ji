@@ -125,10 +125,10 @@ function Table.findsorted(list, target, isless, rev, i, j)
         target = function(value) return t == value end
     end
     if type(isless) ~= "function" then
-        isless, rev, i, j = lessthan(target), isless, rev, i
+        isless, rev, i, j = lessthan(target), isless--[[@as boolean]] , rev--[[@as integer]] , i
     end
     if type(rev) ~= "boolean" then
-        rev, i, j = false, rev, i
+        rev, i, j = false, rev--[[@as integer]] , i
     end
     i = i or 1
     j = j or #list

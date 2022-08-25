@@ -19,7 +19,7 @@ end
 ---The digits of the given integer, from least significant to most significant.
 ---@param n integer
 ---@param base integer? optional, defaults to `10`
----@return function iterator
+---@return function iterator, ...
 function Math.eachdigit(n, base)
     n = assert(math.tointeger(n), "n must be an integer.")
     base = base and assert(base > 0 and math.tointeger(base),
@@ -35,6 +35,8 @@ function Math.eachdigit(n, base)
                 return key, value * (digits(true) and 1 or -1)
             end
         end, Iterators.stateful(nextdigit, base, -n)
+    else
+        error("Unreachable eachdigit " .. n .. " " .. base)
     end
 end
 
@@ -47,7 +49,7 @@ end
 ---Calculates the greatest common divisor of the given integers.
 ---@param x integer
 ---@param y integer?
----@param ... integer
+---@param ... integer?
 function Math.gcd(x, y, ...)
     y = math.tointeger(y)
     return y and Math.gcd(gcd(x, y), ...) or x
@@ -55,7 +57,7 @@ end
 
 ---Calculates the least common multiple of the given integers.
 ---@param x integer
----@param y integer
+---@param y integer?
 ---@param ... integer?
 function Math.lcm(x, y, ...)
     return y and Math.lcm(math.abs(x) * (math.abs(y) // gcd(x, y)), ...) or x

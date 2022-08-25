@@ -51,4 +51,13 @@ assert(not Object.isextensible(object),
 assert(Object.issealed(object), "Frozen object should be sealed.")
 assert(Object.isfrozen(object), "Frozen object should be frozen.")
 
+-- local wrapped = {}
+-- setmetatable(wrapped, {
+--     __add = function()
+--         return true
+--     end,
+-- })
+-- object = Object:new(wrapped)
+-- assert(object + object, "Should proxy metamethods for wrapped tables.")
+
 print("object.lua - Tests passed.")

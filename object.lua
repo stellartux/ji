@@ -67,6 +67,7 @@ function Object.preventextensions(object, shoulderror)
     if rawget(object, "status") < 1 then
         rawset(object, "status", 1)
     end
+    return object
 end
 
 ---Seal an object, preventing any keys from being added or removed.
@@ -78,6 +79,7 @@ function Object.seal(object, shoulderror)
     if rawget(object, "status") < 3 then
         rawset(object, "status", 3)
     end
+    return object
 end
 
 function Object.mt:__index(key)

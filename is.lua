@@ -3,7 +3,7 @@ local is = require("ji/module")()
 local String = require("ji/string")
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.alnum(x)
     if type(x) == "string" then
         return not not x:match("^%w+$")
@@ -15,7 +15,7 @@ function is.alnum(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.alpha(x)
     if type(x) == "string" then
         return not not x:match("^%a+$")
@@ -25,7 +25,7 @@ function is.alpha(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.ascii(x)
     if type(x) == "string" then
         return String.isascii(x)
@@ -35,7 +35,7 @@ function is.ascii(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.blank(x)
     if type(x) == "string" then
         return not not x:match("^[\t ]+$")
@@ -45,7 +45,7 @@ function is.blank(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.cntrl(x)
     if type(x) == "string" then
         return not not x:match("^%c+$")
@@ -55,7 +55,7 @@ function is.cntrl(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.digit(x)
     if type(x) == "string" then
         return not not x:match("^%d+$")
@@ -83,7 +83,7 @@ function is.falsey(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.graph(x)
     if type(x) == "string" then
         return not not x:match("^%g+$")
@@ -103,7 +103,7 @@ function is.lessthan(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.lower(x)
     if type(x) == "string" then
         return not not x:match("^%l+$")
@@ -135,7 +135,7 @@ function is.one(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.print(x)
     if type(x) == "string" then
         return not not x:match("^[%g%s]+$")
@@ -145,7 +145,7 @@ function is.print(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.punct(x)
     if type(x) == "string" then
         return not not x:match("^%p+$")
@@ -158,7 +158,7 @@ function is.punct(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.space(x)
     if type(x) == "string" then
         return x:match("^%s+$")
@@ -172,7 +172,7 @@ function is.truthy(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.upper(x)
     if type(x) == "string" then
         return not not x:match("^%u+$")
@@ -182,7 +182,7 @@ function is.upper(x)
 end
 
 ---@param x string|number
----@return boolean
+---@return boolean?
 function is.xdigit(x)
     if type(x) == "string" then
         return not not x:match("^%x+$")
