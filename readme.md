@@ -55,3 +55,29 @@ More string manipulation functions added to the `string` prototype.
   - Binary search for sorted lists.
 - `issorted`
   - Check if a list is sorted.
+
+## Usage
+
+ji is scoped how you prefer it. Import the whole module as a table, or `export` to attach the module to a table, `_G` by default.
+
+```lua
+local ji = require("ji")
+ji.sum(ipairs({ 1, 2, 3 })) --#= 6
+
+-- or alternatively
+
+require("ji"):export()
+sum(ipairs({ 1, 2, 3 })) --#= 6
+```
+
+Exporting to a specific table is useful for attaching functionality to another metatable.
+
+```lua
+local String = require("ji/string")
+String.split("hello world", " ") --#= {"hello", "world"}
+
+-- or alternatively
+
+require("ji/string"):export(string)
+("hello world"):split(" ") --#= {"hello", "world"}
+```

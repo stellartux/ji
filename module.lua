@@ -8,7 +8,10 @@ local mt = { __index = Module }
 ---@param init table
 ---@return Module
 function Module:new(init)
-    local module = init or {}
+    local module = type(init) == "table" and init or {}
+    if type(init) == "string" then
+        module.__name = init
+    end
     setmetatable(module, mt)
     return module
 end

@@ -6,12 +6,15 @@
 local Iterators = require("ji/module")()
 local Operators = require("ji/operators")
 
+local function void(...) end
+
 ---Given a 2-argument function `combiner` and an iterator `iterator`,
 ---return a new iterator that successively applies `combiner` to the previous
 ---value and the next element of `iterator`.
----@param combiner function with signature `(total, value) -> newtotal`
----@param init any
----@param iterator function
+---@generic Total, Value
+---@param combiner fun(total: Total, value: Value): total: Total
+---@param init Total
+---@param iterator fun(...): Value, ...
 ---@return function stateful
 function Iterators.accumulate(combiner, init, iterator, iterand, key)
     local total = init
@@ -26,7 +29,9 @@ function Iterators.accumulate(combiner, init, iterator, iterand, key)
 end
 
 ---Returns true if every value in the iterator satisfies the predicate.
----@param predicate function (value, key, iterand) -> boolean
+---@generic Value
+---@param predicate fun(value: Value, key, iterand): boolean
+---@param iterator fun(iterand, key): Value
 ---@return boolean
 function Iterators.all(predicate, iterator, iterand, key)
     for key, value in iterator, iterand, key do
@@ -102,9 +107,8 @@ function Iterators.collecttable(iterator, ...)
     return result
 end
 
----@return any value
-local function identity(value)
-    return value
+local function identity(...)
+    return ...
 end
 
 ---Counts how many items satisfy the predicate, or how many truthy items are in
@@ -132,7 +136,7 @@ end
 ---Iterate counting from `start`, adding `step` on each iteration.
 ---@param start? number defaults to `1`
 ---@param step? number defaults to `1`
----@return function iterator
+---@return function iterator, ...
 function Iterators.countfrom(start, step)
     step = step or 1
     start = start and (start - step) or 0
@@ -154,12 +158,12 @@ function Iterators.cumsum(iterator, ...)
 end
 
 ---Cycle through the values of the iterator `count` times, or forever if no count is provided.
----@param count integer? optional, defaults to looping forever
+---@param count? integer optional, defaults to looping forever
 ---@param iterator function
 ---@return function stateful
 function Iterators.cycle(count, iterator, iterand, key)
     if type(count) == "function" then
-        count, iterator, iterand, key = 1 / 0, count, iterator, iterand
+        count, iterator, iterand, key = 1 / 0, count--[[@as function]] , iterator, iterand
     elseif count == 0 then
         return identity
     end
@@ -208,33 +212,36 @@ function Iterators.diff(iterator, iterand, key)
 end
 
 ---Drop values from the start of an iterator.
----@param count integer optional, defaults to `1`
+---@param count? integer optional, defaults to `1`
 ---@param iterator function
----@return function iterator
+---@return function iterator, ...
 function Iterators.drop(count, iterator, iterand, key)
     if type(count) ~= "number" then
-        count, iterator, iterand, key = 1, count, iterator, iterand
+        count, iterator, iterand, key = 1, count--[[@as function]] , iterator, iterand
     end
     for _ = 1, count do
         key = iterator(iterand, key)
         if key == nil then
-            return
+            break
         end
     end
     return iterator, iterand, key
 end
 
 ---Wraps an iterator, replacing its keys with a series of numbers.
----@param init number? defaults to `1`
----@param step number? defaults to `1`
----@param iterator function
----@return function iterator
+---@param init? number defaults to `1`
+---@param step? number defaults to `1`
+---@generic Value, Iterand, Key
+---@param iterand Iterand
+---@param key Key
+---@param iterator fun(i:Iterand, k:Key): Value, Key
+---@return fun(): number, Value iterator, Iterand, Key
 function Iterators.enumerate(init, step, iterator, iterand, key)
     if type(init) ~= "number" then
-        init, step, iterator, iterand, key = 1, init, step, iterator, iterand
+        init, step, iterator, iterand, key = 1, init, step--[[@as function]] , iterator, iterand
     end
     if type(step) ~= "number" then
-        step, iterator, iterand, key = 1, step, iterator, iterand
+        step, iterator, iterand, key = 1, step--[[@as function]] , iterator, iterand
     end
     return function(step, i)
         local value
@@ -300,6 +307,11 @@ function Iterators.filter(predicate, iterator, iterand, key)
     end
 end
 
+---@generic Value
+---@param endofunctor fun(init: Value, previous?: Value): value: Value, previous: Value
+---@param init Value
+---@param previous? Value
+---@return Value?, Value?
 local function fixatenext(endofunctor, init, previous)
     previous = previous or init
     local value = endofunctor(previous)
@@ -311,8 +323,10 @@ end
 ---Calls `value = endofunctor(value)`, returning `value` each iteration,
 ---breaking when a fixed point is found. The iterator returns
 ---the value and the previous value.
+---@generic Value
 ---@param endofunctor function
----@return function iterator
+---@param value Value
+---@return fun(endofunctor: (fun(left: Value, right: Value): Value?), value: Value): Value iterator, fun(left: Value, right: Value): Value? endofunctor, Value? value
 function Iterators.fixate(endofunctor, value)
     return fixatenext, endofunctor, value
 end
@@ -533,8 +547,10 @@ local function repeatednext(value, count)
 end
 
 ---Return `value` `count` times, or forever if no `count` is provided.
+---@generic Value
+---@param value Value
 ---@param count? integer optional, defaults to forever
----@return function iterator
+---@return fun(value: Value, count?: integer): value: Value? iterator, Value value, integer?
 function Iterators.repeated(value, count)
     if count == nil then
         return forevernext, value
@@ -578,7 +594,7 @@ end
 ---@return any total
 function Iterators.sum(init, iterator, iterand, key)
     if type(init) == "function" then
-        init, iterator, iterand, key = 0, init, iterator, iterand
+        init, iterator, iterand, key = 0, init--[[@as function]] , iterator, iterand
     end
     for _, value in iterator, iterand, key do
         init = init + value
@@ -632,8 +648,9 @@ function Iterators.takewhile(predicate, iterator, iterand, key)
 end
 
 ---Iterate over unique values of the given iterator.
----@param iterator function
----@return function stateful
+---@generic T
+---@param iterator fun(iterand, key): T?, ...
+---@return fun(): T? stateful
 function Iterators.unique(iterator, iterand, key)
     local seen = {}
     return function()
@@ -695,8 +712,8 @@ end
 ---Iterate through several lists together. Each iteration returns an index, and
 ---the values at that index of each of the lists passed in. Iterates until any of
 ---the lists is empty.
----@param ... table
----@return function iterator
+---@param ... any[]
+---@return fun(...): any[] iterator, any[][], integer
 function Iterators.ziplists(...)
     return ziplistsnext, { ... }, 0
 end

@@ -1,17 +1,29 @@
-local Table = {}
+local Table = require("ji/module")("Table")
+
+function Table:copy()
+    local result = {}
+    for k, v in pairs(self) do
+        result[k] = v
+    end
+    return result
+end
+
+function Table:copyi()
+    return table.pack(table.unpack(self))
+end
 
 ---Deep comparison of two tables.
----@param a table
----@param b table
-function Table.equal(a, b)
+function Table.equal(self, other)
+    if type(self) ~= type(other) then return false end
+    if type(self) ~= "table" then return self == other end
     local keys = {}
-    for key, val in pairs(a) do
+    for key, val in pairs(self) do
         keys[key] = true
-        if type(val) == "table" and not Table.equal(val, b[key]) or val ~= b[key] then
+        if not Table.equal(val, other[key]) then
             return false
         end
     end
-    for key in pairs(b) do
+    for key in pairs(other) do
         if keys[key] then
             keys[key] = nil
         else
@@ -23,14 +35,14 @@ end
 
 ---Deep comparison of two tables, as lists.
 ---Only elements with integer indices are compared.
----@param a table
----@param b table
-function Table.equallist(a, b)
-    if type(a) ~= "table" or type(b) ~= "table" or #a ~= #b then
+---@param self any[]
+---@param other any[]
+function Table.equallist(self, other)
+    if type(self) ~= "table" or type(other) ~= "table" or #self ~= #other then
         return false
     end
-    for key, val in ipairs(a) do
-        if type(val) == "table" and not Table.equal(val, b[key]) or val ~= b[key] then
+    for key, val in ipairs(self) do
+        if not Table.equal(val, other[key]) then
             return false
         end
     end
@@ -170,16 +182,23 @@ function Table.issorted(list, isless, rev)
     return true
 end
 
+function Table.map(self, fn)
+    local result = {}
+    for key, value in ipairs(self) do
+        result[key] = fn(value, key, self)
+    end
+    return result
+end
+
 ---Print the table as a hashmap.
----@param table table
-function Table.printpairs(table)
-    for k, v in pairs(table) do print(k, v) end
+function Table.print(self)
+    for k, v in pairs(self) do print(k, v) end
 end
 
 ---Print the table as a list.
----@param list any[]
-function Table.printipairs(list)
-    for i, v in ipairs(list) do print(i, v) end
+---@param self any[]
+function Table.printi(self)
+    for i, v in ipairs(self) do print(i, v) end
 end
 
 ---Reverses a list in place.
@@ -196,6 +215,32 @@ function Table.reverse(list, start, stop)
         list[i], list[stop - i + 1] = list[stop - i + 1], list[i]
     end
     return list
+end
+
+local function repr(value)
+    if type(value) == "string" then
+        return "\"" .. value .. "\""
+    else
+        return tostring(value)
+    end
+end
+
+function Table.show(self)
+    print((self.__name or "Table") .. " {")
+    for key, val in pairs(self) do
+        print("    "
+            .. (type(key) == "number" and "[" .. key .. "]" or tostring(key))
+            .. " = "
+            .. (val == self and "self" or repr(val))
+            .. (next(self, key) and "," or ""))
+    end
+    print("}")
+end
+
+function Table.showi(self)
+    print((self.__name or "Table") .. " { "
+        .. table.concat(Table.map(self, repr), ", ")
+        .. " }")
 end
 
 return Table
