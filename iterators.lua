@@ -3,10 +3,8 @@
     https://docs.julialang.org/en/v1/base/iterators/
 ]] --
 --
-local Iterators = require("ji/module")()
+local Iterators = require("ji/module")("Iterators")
 local Operators = require("ji/operators")
-
-local function void(...) end
 
 ---Given a 2-argument function `combiner` and an iterator `iterator`,
 ---return a new iterator that successively applies `combiner` to the previous
@@ -287,9 +285,8 @@ end
 ---@param count integer
 ---@return table
 function Iterators.fill(value, count)
-    if not count or count < 0 then
-        error "Invalid fill count."
-    end
+    assert(count and count >= 0,
+        "Expected a non-negative integer, got " .. tostring(value))
     return Iterators.collect(Iterators.repeated(value, count))
 end
 
@@ -355,7 +352,6 @@ end
 ---Call `procedure` on each value of `iterator`, for `procedure`'s side effects.
 ---@param procedure function
 ---@param iterator function
----@return nil
 function Iterators.foreach(procedure, iterator, ...)
     for _, value in iterator, ... do
         procedure(value)
@@ -509,7 +505,7 @@ end
 ---@return any product
 function Iterators.prod(init, iterator, iterand, key)
     if type(init) == "function" then
-        init, iterator, iterand, key = 0, init--[[@as function]] , iterator, iterand
+        init, iterator, iterand, key = 1, init--[[@as function]] , iterator, iterand
     end
     for _, value in iterator, iterand, key do
         init = init * value
@@ -650,17 +646,24 @@ function Iterators.takewhile(predicate, iterator, iterand, key)
 end
 
 ---Iterate over unique values of the given iterator.
----@generic T
----@param iterator fun(iterand, key): T?, ...
----@return fun(): T? stateful
+---@generic Iterand, Key, Value
+---@param iterator fun(iterand: Iterand, key?: Key): Value?
+---@param iterand Iterand
+---@param key Key
+---@return fun(): key: Key?, value: Value? stateful
 function Iterators.unique(iterator, iterand, key)
     local seen = {}
+    local seennil = false
     return function()
         local value
         repeat
             key, value = iterator(iterand, key)
-        until not seen[value] or key == nil
-        seen[value] = true
+        until key == nil or (value == nil and seennil or seen[value])
+        if value == nil then
+            seennil = true
+        else
+            seen[value] = true
+        end
         return key, value
     end
 end
