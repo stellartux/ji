@@ -1,4 +1,5 @@
 ---@class Deque
+---@field __name string
 ---A deque is a Double-Ended QUEue.
 local Deque = require("ji/class")("Deque")
 
@@ -6,9 +7,7 @@ local Deque = require("ji/class")("Deque")
 ---@param list any[]?
 ---@return Deque
 function Deque:new(list)
-    local deque = list and { table.unpack(list) } or {}
-    setmetatable(deque, self)
-    return deque
+    return setmetatable(list and table.pack(table.unpack(list)) or {}, self)
 end
 
 ---Append the other deque to the end of the deque.
@@ -19,12 +18,12 @@ function Deque:append(other)
     return self
 end
 
----Create a shallow copy of the deque.
+--- Create a shallow copy of the deque.
 function Deque:copy()
     return Deque:new(self)
 end
 
----Empty the deque, reseting it to its initial state.
+--- Empty the deque, resetting it to its initial state.
 function Deque:empty()
     for index in ipairs(self) do
         self[index] = nil
@@ -101,7 +100,6 @@ function Deque:__eq(other)
 end
 
 Deque.__index = Deque
-Deque.__name = "Deque"
 
 function Deque:__tostring()
     return self.__name .. "{" .. table.concat(self, ", ") .. "}"

@@ -12,10 +12,10 @@ assert(not Table.equal({ a = 1, b = 2, c = 3 }, t))
 
 print("    equallist(...)")
 local l = { 1, 2, 3 }
-assert(Table.equallist(l, l))
-assert(Table.equallist(l, { 1, 2, 3 }))
-assert(not Table.equallist(l, { 2, 3, 4 }))
-assert(not Table.equallist(l, { 1, 2, 3, 4 }))
+assert(Table.equali(l, l))
+assert(Table.equali(l, { 1, 2, 3 }))
+assert(not Table.equali(l, { 2, 3, 4 }))
+assert(not Table.equali(l, { 1, 2, 3, 4 }))
 
 print("    reverse()")
 assert(Table.reverse({ 1, 2, 3 }), { 3, 2, 1 })

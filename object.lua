@@ -90,8 +90,6 @@ function Object.mt:__len()
     return #rawget(self, "data")
 end
 
-Object.__name = "Object"
-
 function Object.mt:__newindex(key, value)
     local status = rawget(self, "status")
     local haskey = rawget(self, "data")[key] ~= nil

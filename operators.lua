@@ -27,8 +27,9 @@ local function rightassociative(operator)
 end
 
 ---Convert a 2-ary transitive relation function to an n-ary relation function.
----@param relation function 2-ary transitive
----@return function relation n-ary
+---@generic T
+---@param relation fun(l: T, r: T): T 2-ary transitive function
+---@return fun(...: T): T relation n-ary
 local function transitive(relation)
     return function(x, y, ...)
         for i = 1, select('#', y, ...) do

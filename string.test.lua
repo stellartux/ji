@@ -42,7 +42,7 @@ assert(String.isascii("Hello, world!"), "Should recognize ASCII characters.")
 assert(not String.isascii("Hello, world! 👋🌍"),
     "Should recognize non ASCII characters.")
 
-assert(Table.equallist(Iterators.collect(String.eachchar("woo")), { "w", "o", "o" }))
-assert(Table.equallist(Iterators.collect(String.eachbyte("yeah")), { 121, 101, 97, 104 }))
+assert(Table.equali(Iterators.collect(String.eachchar("woo")), { "w", "o", "o" }))
+assert(Table.equali(Iterators.collect(String.eachbyte("yeah")), { 121, 101, 97, 104 }))
 
 print("String - Tests passed.")

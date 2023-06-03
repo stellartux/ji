@@ -1,10 +1,16 @@
 --[[
     Base.Iterators
     https://docs.julialang.org/en/v1/base/iterators/
-]] --
+]]
+--
 --
 local Iterators = require("ji/module")("Iterators")
 local Operators = require("ji/operators")
+
+---@generic Table, Key, Value
+---@alias stateful (fun(): Value?)|(fun(): Value?, Value?)
+---@alias stateless fun(t: Table, k: Key?): Key?, Value?
+---@alias iterator stateless|stateful
 
 ---Given a 2-argument function `combiner` and an iterator `iterator`,
 ---return a new iterator that successively applies `combiner` to the previous
@@ -13,7 +19,7 @@ local Operators = require("ji/operators")
 ---@param combiner fun(total: Total, value: Value): total: Total
 ---@param init Total
 ---@param iterator fun(...): Value, ...
----@return function stateful
+---@return fun(key: any, value: Value, ...): ... stateful
 function Iterators.accumulate(combiner, init, iterator, iterand, key)
     local total = init
     return function()
@@ -83,13 +89,20 @@ function Iterators.any(predicate, iterator, iterand, key)
     return false
 end
 
----Convert an iterator into a list.
----@param iterator function
----@return table list
+--- Collects
+function Iterators.apply(fn, iterator, ...)
+    return fn(table.unpack(Iterators.collect(iterator, ...)))
+end
+
+--- Convert an iterator into a list.
+---@generic T, K, V
+---@param iterator fun(t: T, k: K): K, V
+---@return V[] list
+---@overload fun(iterator: fun(): any): any[]
 function Iterators.collect(iterator, ...)
     local result = {}
-    for _, value in iterator, ... do
-        table.insert(result, value)
+    for key, value in iterator, ... do
+        table.insert(result, value or key)
     end
     return result
 end
@@ -134,7 +147,7 @@ end
 ---Iterate counting from `start`, adding `step` on each iteration.
 ---@param start? number defaults to `1`
 ---@param step? number defaults to `1`
----@return function iterator, ...
+---@return fun(step: integer, total: integer): (total: integer), integer, integer
 function Iterators.countfrom(start, step)
     step = step or 1
     start = start and (start - step) or 0
@@ -161,7 +174,7 @@ end
 ---@return function stateful
 function Iterators.cycle(count, iterator, iterand, key)
     if type(count) == "function" then
-        count, iterator, iterand, key = 1 / 0, count--[[@as function]] , iterator, iterand
+        count, iterator, iterand, key = 1 / 0, count --[[@as function]], iterator, iterand
     elseif count == 0 then
         return identity
     end
@@ -176,9 +189,10 @@ function Iterators.cycle(count, iterator, iterand, key)
             if key ~= nil then
                 table.insert(keys, key)
                 table.insert(values, value)
-                return value
+                return key, value
             end
             exhausted = true
+            count = count - 1
         end
         index = index + 1
         if index > #keys then
@@ -215,7 +229,7 @@ end
 ---@return function iterator, ...
 function Iterators.drop(count, iterator, iterand, key)
     if type(count) ~= "number" then
-        count, iterator, iterand, key = 1, count--[[@as function]] , iterator, iterand
+        count, iterator, iterand, key = 1, count --[[@as function]], iterator, iterand
     end
     for _ = 1, count do
         key = iterator(iterand, key)
@@ -224,6 +238,22 @@ function Iterators.drop(count, iterator, iterand, key)
         end
     end
     return iterator, iterand, key
+end
+
+---@generic T
+---@param predicate fun(value: T): boolean
+---@param iterator fun(iterand, key): T?
+---@return fun(): T? iterator
+function Iterators.dropwhile(predicate, iterator, iterand, key)
+    local done = false
+    return function()
+        local value
+        repeat
+            key, value = iterator(iterand, key)
+        until done or key == nil or not predicate(value)
+        done = true
+        return key, value
+    end
 end
 
 ---Wraps an iterator, replacing its keys with a series of numbers.
@@ -236,10 +266,10 @@ end
 ---@return fun(): number, Value iterator, Iterand, Key
 function Iterators.enumerate(init, step, iterator, iterand, key)
     if type(init) ~= "number" then
-        init, step, iterator, iterand, key = 1, init, step--[[@as function]] , iterator, iterand
+        init, step, iterator, iterand, key = 1, init, step --[[@as function]], iterator, iterand
     end
     if type(step) ~= "number" then
-        step, iterator, iterand, key = 1, step--[[@as function]] , iterator, iterand
+        step, iterator, iterand, key = 1, step --[[@as function]], iterator, iterand
     end
     return function(step, i)
         local value
@@ -367,7 +397,7 @@ local function keys(_, x) return x, x end
 
 ---Iterate over the keys of a table, or convert a `key, value` iterator to a `key, key` iterator.
 ---@param ... table|function
----@return function stateful if passed an iterator, `stateless` is passed a table.
+---@return function stateful, ... if passed an iterator, `stateless` is passed a table.
 function Iterators.keys(...)
     if type(...) == "table" then
         return nextkey, ...
@@ -379,7 +409,7 @@ function Iterators.keys(...)
 end
 
 ---Call `mapper` on each value of `iterator`.
----@param mapper function `(value, key, iterand) -> newvalue`
+---@param mapper fun(value, key, iterand): newvalue: any`
 ---@param iterator function
 ---@return function stateful
 function Iterators.map(mapper, iterator, iterand, key)
@@ -505,7 +535,7 @@ end
 ---@return any product
 function Iterators.prod(init, iterator, iterand, key)
     if type(init) == "function" then
-        init, iterator, iterand, key = 1, init--[[@as function]] , iterator, iterand
+        init, iterator, iterand, key = 1, init --[[@as function]], iterator, iterand
     end
     for _, value in iterator, iterand, key do
         init = init * value
@@ -592,7 +622,7 @@ end
 ---@return any total
 function Iterators.sum(init, iterator, iterand, key)
     if type(init) == "function" then
-        init, iterator, iterand, key = 0, init--[[@as function]] , iterator, iterand
+        init, iterator, iterand, key = 0, init --[[@as function]], iterator, iterand
     end
     for _, value in iterator, iterand, key do
         init = init + value

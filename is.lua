@@ -1,5 +1,5 @@
 --- The `is` module contains predicates.
-local is = require("ji/module")()
+local is = require("ji/module")("is")
 local String = require("ji/string")
 
 ---@param x string|number
@@ -68,7 +68,7 @@ function is.empty(x)
     return #x == 0
 end
 
----@return function `y -> y == x`
+---@return fun(y): boolean -- x == y
 function is.equal(x)
     return function(y) return y == x end
 end
@@ -112,12 +112,12 @@ function is.lower(x)
     end
 end
 
----@return function `y -> y >= x`
+---@return fun(y): boolean -- y >= x
 function is.greaterequal(x)
     return function(y) return y >= x end
 end
 
----@return function `y -> y > x`
+---@return fun(y): boolean -- y > x
 function is.greaterthan(x)
     return function(y) return y > x end
 end
