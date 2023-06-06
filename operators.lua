@@ -41,15 +41,43 @@ local function transitive(relation)
     end
 end
 
-Operators.add = leftassociative(function(x, y) return x + y end)
+local function commutativeinner(fn, length, ...)
+    if length > 3 then
+        return fn(
+            commutativeinner(
+                fn,
+                length - length // 2,
+                select(length // 2 + 1, ...)
+            ),
+            commutativeinner(fn, length // 2, ...)
+        )
+    elseif length == 3 then
+        return fn(..., fn(select(2, ...), (select(3, ...))))
+    elseif length == 2 then
+        return fn(..., (select(2, ...)))
+    end
+end
+
+--- Convert a 2-ary commutative relation function to an n-ary relation function
+--- that performs `log(N)` operations.
+---@generic T
+---@param relation fun(l: T, r: T): T 2-ary commutative function
+---@return fun(...: T): T relation n-ary
+local function commutative(relation)
+    return function(...)
+        return commutativeinner(relation, select('#', ...), ...)
+    end
+end
+
+Operators.add = commutative(function(x, y) return x + y end)
 Operators.sub = leftassociative(function(x, y) return x - y end)
-Operators.mul = leftassociative(function(x, y) return x * y end)
+Operators.mul = commutative(function(x, y) return x * y end)
 Operators.div = leftassociative(function(x, y) return x / y end)
 Operators.mod = leftassociative(function(x, y) return x % y end)
 Operators.idiv = leftassociative(function(x, y) return x // y end)
-Operators.band = leftassociative(function(x, y) return x & y end)
-Operators.bor = leftassociative(function(x, y) return x | y end)
-Operators.bxor = leftassociative(function(x, y) return x ~ y end)
+Operators.band = commutative(function(x, y) return x & y end)
+Operators.bor = commutative(function(x, y) return x | y end)
+Operators.bxor = commutative(function(x, y) return x ~ y end)
 Operators.shl = leftassociative(function(x, y) return x << y end)
 Operators.shr = leftassociative(function(x, y) return x >> y end)
 Operators.concat = leftassociative(function(x, y) return x .. y end)
@@ -65,5 +93,6 @@ Operators.ge = transitive(function(x, y) return x >= y end)
 Operators.leftassociative = leftassociative
 Operators.rightassociative = rightassociative
 Operators.transitive = transitive
+Operators.commutative = commutative
 
 return Operators

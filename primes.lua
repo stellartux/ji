@@ -292,7 +292,7 @@ function Primes.factor:new(n)
         table.insert(result, { n == 0 and 0 or -1, 1 })
         n = -n
     end
-    for prime in Primes.eachprime(math.floor(math.sqrt(n))) do
+    for prime in Primes.eachprime(n) do
         while n % prime == 0 do
             local i
             for j = 1, #result do

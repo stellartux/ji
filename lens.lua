@@ -21,8 +21,6 @@ function Lens:__index(key)
     return rawget(self, "data")[key]
 end
 
-Lens.__name = "Lens"
-
 function Lens:__newindex(key, value)
     local previousvalue = rawget(self, "data")[key]
     if previousvalue ~= nil then

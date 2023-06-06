@@ -13,6 +13,7 @@ Matrix.ismatrix = true
 ---@param height integer? the number of rows in the matrix. Optional if initialised with another Matrix.
 ---@param init function|number[]|Matrix? a list, matrix or generator function for the initial values of the matrix.
 ---@return Matrix
+---@overload fun(self, values: number[], height: integer): Matrix
 function Matrix:new(width, height, init, ...)
     local matrix = {}
     if type(width) == "number" then
