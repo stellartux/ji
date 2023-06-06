@@ -1,7 +1,15 @@
 {
-  "vscode-lua-format.configPath": "lua-format-config.yaml",
-  "editor.formatOnSave": true,
-  "editor.rulers": [83],
+  "editor.formatOnSave": false,
+  "editor.rulers": [
+    80
+  ],
   "terminal.integrated.fontFamily": "'B612 Mono', monospace",
-  "Lua.diagnostics.disable": ["redefined-local"]
+  "Lua.diagnostics.disable": [
+    "redefined-local"
+  ],
+  "Lua.workspace.library": [
+    "${3rd}/luassert/library",
+    "/home/dan/.config/Code - OSS/User/globalStorage/sumneko.lua/addonManager/addons/busted/module/library"
+  ],
+  "Lua.workspace.checkThirdParty": false
 }
