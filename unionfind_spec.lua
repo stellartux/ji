@@ -1,0 +1,26 @@
+#!/usr/bin/env busted
+
+local UnionFind = require("unionfind")
+
+describe("UnionFind", function ()
+    local uf
+    it("should be instantiated with values", function ()
+        uf = UnionFind(1, 2, 3)
+        assert.equal(3, #uf)
+    end)
+    it("should be able to find values in the set", function ()
+        assert.truthy(uf:find(1))
+        assert.truthy(uf:find(2))
+        assert.truthy(uf:find(3))
+        assert.falsy(uf:find(4))
+    end)
+    it("should be able to combine sets", function ()
+        assert.are_not_equal(uf:find(1), uf:find(3))
+        assert.are_not_equal(uf:find(1), uf:find(2))
+        assert.are_not_equal(uf:find(2), uf:find(3))
+        uf:union(1, 3)
+        assert.are_equal(uf:find(1), uf:find(3))
+        assert.are_not_equal(uf:find(1), uf:find(2))
+        assert.are_not_equal(uf:find(2), uf:find(3))
+    end)
+end)
